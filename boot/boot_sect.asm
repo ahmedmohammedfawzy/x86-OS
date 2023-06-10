@@ -17,11 +17,11 @@ call switch_to_pm ; We never return from here
 
 jmp $
 
-%include "boot_sect_print.asm"
+%include "print.asm"
 %include "disk_load.asm"
-%include "32bit-gdt.asm"
-%include "32bit-print.asm"
-%include "32bit-switch.asm"
+%include "gdt.asm"
+%include "pm-print.asm"
+%include "pm-switch.asm"
 
 [bits 16]
 load_kernel:
