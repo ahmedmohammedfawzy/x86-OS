@@ -23,7 +23,7 @@ kernel.bin: kernel/kernel_entry.o ${OBJ}
 
 # Build our kernel object file .
 %.o: %.c ${HEADERS}
-	i386-elf-gcc -ffreestanding -c $< -o $@
+	i386-elf-gcc -masm=intel -ffreestanding -c $< -o $@
 
 # Build our kernel entry object file .
 %.o: %.asm
