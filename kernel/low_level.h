@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 uint8_t port_byte_in(uint16_t port);

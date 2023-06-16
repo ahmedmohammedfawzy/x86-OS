@@ -1,14 +1,14 @@
 
-C_SOURCES = $(wildcard kernel/*.c drivers/*.c)
-HEADERS = $(wildcard kernel/*.h drivers/*.h)
+C_SOURCES = $(wildcard kernel/*.c drivers/*.c cpu/*.c)
+HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h)
 
-OBJ = ${C_SOURCES:.c=.o}
+OBJ = ${C_SOURCES:.c=.o cpu/interrupt.o}
 
 all: os-image
 
 # Run qemu to simulate booting of our code.
 run: all
-	qemu-system-x86_64 os-image -display curses
+	qemu-system-x86_64 -fda os-image -display curses
 
 # This is the actual disk image that the computer loads,
 # which is the combination of our compiled bootsector and kernel
@@ -23,7 +23,7 @@ kernel.bin: kernel/kernel_entry.o ${OBJ}
 
 # Build our kernel object file .
 %.o: %.c ${HEADERS}
-	i386-elf-gcc -masm=intel -ffreestanding -c $< -o $@
+	i386-elf-gcc -Wall -Wextra -masm=intel -ffreestanding -c $< -o $@
 
 # Build our kernel entry object file .
 %.o: %.asm

@@ -1,15 +1,17 @@
+#include <stdint.h>
 #include "screen.h"
 #include "../kernel/low_level.h"
-#include <stdint.h>
+#include "../kernel/utils.h"
 
 /* Declaration of private functions */
-uint16_t get_cursor_offset();
-void set_cursor_offset(uint16_t offset);
-uint16_t get_offset(int16_t col, int16_t  row);
-uint16_t print_char(char character, int16_t col, int16_t row, uint8_t attribute_byte);
+uintptr_t get_cursor_offset();
+void set_cursor_offset(uintptr_t offset);
+uintptr_t get_offset(int16_t col, int16_t  row);
+uintptr_t print_char(char character, int16_t col, int16_t row, uint8_t attribute_byte);
 void print_at(char* message, int16_t col, int16_t row);
-uint16_t get_row_from_offset(uint16_t offset); 
-uint16_t get_col_from_offest(uint16_t offset);
+uint16_t get_row_from_offset(uintptr_t offset); 
+uint16_t get_col_from_offest(uintptr_t offset);
+uintptr_t handle_scrolling(uintptr_t offset);
 
 void print(char* message) 
 {
@@ -55,7 +57,7 @@ void print_at(char* message, int16_t col, int16_t row)
     }
 }
 
-uint16_t print_char(char character, int16_t col, int16_t row, uint8_t attribute_byte) 
+uintptr_t print_char(char character, int16_t col, int16_t row, uint8_t attribute_byte) 
 {
     // This function will print character to specific location
     // or append it at the cursor position if col and row is negative
@@ -88,11 +90,13 @@ uint16_t print_char(char character, int16_t col, int16_t row, uint8_t attribute_
         offset += 2;
     }
 
+    offset = handle_scrolling(offset);
+
     set_cursor_offset(offset);
     return offset;
 }
 
-uint16_t get_cursor_offset() 
+uintptr_t get_cursor_offset() 
 {
     // The device uses its control register as an index
     // to select its internal registers , of which we are
@@ -113,7 +117,7 @@ uint16_t get_cursor_offset()
     return offset * 2;
 }
 
-void set_cursor_offset(uint16_t offset) 
+void set_cursor_offset(uintptr_t  offset) 
 {
     /* Similar to get_cursor_offset, but instead of reading we write data */
     offset /= 2;
@@ -123,6 +127,27 @@ void set_cursor_offset(uint16_t offset)
     port_byte_out(REG_SCREEN_DATA, (offset & 0xff));
 }
 
-uint16_t get_offset(int16_t col, int16_t row) { return 2 * (row * MAX_COLS + col); }
-uint16_t get_row_from_offset(uint16_t offset) { return offset / (2 * MAX_COLS); }
-uint16_t get_col_from_offest(uint16_t  offset) { return (offset - (get_row_from_offset(offset)*2*MAX_COLS))/2; }
+
+uintptr_t handle_scrolling(uintptr_t offset)
+{
+    if (offset > MAX_COLS * MAX_ROWS * 2) 
+    {
+        for (int i = 1; i <= MAX_ROWS; i++) 
+        {
+            memory_copy((char*)VIDEO_ADDRESS + get_offset(0, i), 
+                        (char*)VIDEO_ADDRESS + get_offset(0, i-1), 
+                        MAX_COLS*2);
+        }
+
+        char* last_line = (char*)(get_offset(0, MAX_ROWS - 1) + VIDEO_ADDRESS);
+        for (int i = 0; i < MAX_COLS * 2; i++) last_line[i] = 0;
+
+        offset -= 2 * MAX_COLS;
+    }
+
+    return offset;
+}
+
+uintptr_t get_offset(int16_t col, int16_t row) { return 2 * (row * MAX_COLS + col); }
+uint16_t get_row_from_offset(uintptr_t offset) { return offset / (2 * MAX_COLS); }
+uint16_t get_col_from_offest(uintptr_t  offset) { return (offset - (get_row_from_offset(offset)*2*MAX_COLS))/2; }
