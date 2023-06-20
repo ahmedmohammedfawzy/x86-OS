@@ -10,6 +10,11 @@ all: os-image
 run: all
 	qemu-system-x86_64 -fda os-image -display curses
 
+# Open the connection to qemu and load our kernel-object file with symbols
+debug: os-image kernel.elf
+	qemu-system-i386 -s -fda os-image &
+	gdb -ex "target remote localhost:1234" -ex "symbol-file kernel.elf"
+
 # This is the actual disk image that the computer loads,
 # which is the combination of our compiled bootsector and kernel
 os-image: boot/boot_sect.bin kernel.bin
@@ -21,9 +26,13 @@ os-image: boot/boot_sect.bin kernel.bin
 kernel.bin: kernel/kernel_entry.o ${OBJ}
 	i386-elf-ld -o kernel.bin -Ttext 0x1000 $^ --oformat binary
 
+# Used for debugging purposes
+kernel.elf: kernel/kernel_entry.o ${OBJ}
+	i386-elf-ld -o $@ -Ttext 0x1000 $^
+
 # Build our kernel object file .
 %.o: %.c ${HEADERS}
-	i386-elf-gcc -Wall -Wextra -masm=intel -ffreestanding -c $< -o $@
+	i386-elf-gcc -Wall -Wextra -masm=intel -g -ffreestanding -c $< -o $@
 
 # Build our kernel entry object file .
 %.o: %.asm
@@ -35,7 +44,7 @@ kernel.bin: kernel/kernel_entry.o ${OBJ}
 
 # Clear away all generated files .
 clean:
-	rm -fr *.bin *.dis *.o os-image *.map
+	rm -fr *.elf *.bin *.dis *.o os-image *.map
 	rm -fr kernel/*.o boot/*.bin drivers/*.o
 
 # Disassemble our kernel - might be useful for debugging .

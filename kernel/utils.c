@@ -21,6 +21,25 @@ void int_to_ascii(int32_t n, char str[])
 
     if (sign < 0) str[i++] = '-';
     str[i] = '\0';
+
+    reverse(str);
+}
+
+/* K&R */
+void reverse(char s[]) {
+    int c, i, j;
+    for (i = 0, j = strlen(s)-1; i < j; i++, j--) {
+        c = s[i];
+        s[i] = s[j];
+        s[j] = c;
+    }
+}
+
+/* K&R */
+int strlen(char s[]) {
+    int i = 0;
+    while (s[i] != '\0') ++i;
+    return i;
 }
 
 uint16_t low_16(uint32_t bits) 
