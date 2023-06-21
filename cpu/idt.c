@@ -1,5 +1,5 @@
 #include "idt.h"
-#include "../kernel/utils.h"
+#include "../libc/mem.h"
 #include <stdint.h>
 
 idt_gate_t idt[IDT_ENTRIES];

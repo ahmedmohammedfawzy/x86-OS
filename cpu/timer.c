@@ -1,16 +1,16 @@
 #include "timer.h"
 #include "../drivers/screen.h"
-#include "../kernel/utils.h"
 #include "isr.h"
-#include "../kernel/low_level.h"
+#include "../drivers/port.h"
+#include "../libc/string.h"
 #include <stdint.h>
 
 uint32_t tick = 0;
 
 static void timer_callback(registers_t regs) {
-    print("timer_callback called\n");
+//    print("timer_callback called\n");
     tick++;
-    print("Tick: ");
+//    print("Tick: ");
     
     char tick_ascii[256];
     int_to_ascii(tick, tick_ascii);

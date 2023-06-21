@@ -1,8 +1,11 @@
 
-C_SOURCES = $(wildcard kernel/*.c drivers/*.c cpu/*.c)
-HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h)
+C_SOURCES = $(wildcard kernel/*.c drivers/*.c cpu/*.c libc/*.c)
+HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h libc/*.h)
 
 OBJ = ${C_SOURCES:.c=.o cpu/interrupt.o}
+
+CFLAGS = -g -Wall -Wextra
+
 
 all: os-image
 
@@ -32,7 +35,7 @@ kernel.elf: kernel/kernel_entry.o ${OBJ}
 
 # Build our kernel object file .
 %.o: %.c ${HEADERS}
-	i386-elf-gcc -Wall -Wextra -masm=intel -g -ffreestanding -c $< -o $@
+	i386-elf-gcc ${CFLAGS} -masm=intel -ffreestanding -c $< -o $@
 
 # Build our kernel entry object file .
 %.o: %.asm
