@@ -27,7 +27,7 @@ os-image: boot/boot_sect.bin kernel.bin
 # - the kernel_entry , which jumps to main () in our kernel
 # - the compiled C kernel
 kernel.bin: kernel/kernel_entry.o ${OBJ}
-	i386-elf-ld -o kernel.bin -Ttext 0x1000 $^ --oformat binary
+	i386-elf-ld -T linker.ld -o kernel.bin $^ --oformat binary --verbose
 
 # Used for debugging purposes
 kernel.elf: kernel/kernel_entry.o ${OBJ}
