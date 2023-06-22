@@ -4,7 +4,7 @@ HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h libc/*.h)
 
 OBJ = ${C_SOURCES:.c=.o cpu/interrupt.o}
 
-CFLAGS = -g -Wall -Wextra
+CFLAGS = -g -Wall -Wextra -fno-exceptions -m32
 
 
 all: os-image
